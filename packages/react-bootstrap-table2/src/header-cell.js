@@ -1,14 +1,13 @@
 /* eslint react/require-default-props: 0 */
-import React from 'react';
-import cs from 'classnames';
-import PropTypes from 'prop-types';
+import React from "react";
+import cs from "classnames";
+import PropTypes from "prop-types";
 
-import Const from './const';
-import SortSymbol from './sort/symbol';
-import SortCaret from './sort/caret';
-import _ from './utils';
-import eventDelegater from './cell-event-delegater';
-
+import Const from "./const";
+import SortSymbol from "./sort/symbol";
+import SortCaret from "./sort/caret";
+import _ from "./utils";
+import eventDelegater from "./cell-event-delegater";
 
 class HeaderCell extends eventDelegater(React.Component) {
   render() {
@@ -23,7 +22,7 @@ class HeaderCell extends eventDelegater(React.Component) {
       currFilters,
       filterPosition,
       onExternalFilter,
-      globalSortCaret
+      globalSortCaret,
     } = this.props;
 
     const {
@@ -40,21 +39,20 @@ class HeaderCell extends eventDelegater(React.Component) {
       headerStyle,
       headerAttrs,
       headerSortingClasses,
-      headerSortingStyle
+      headerSortingStyle,
+      parentHeader,
     } = column;
 
     const sortCaretfunc = sortCaret || globalSortCaret;
 
     const delegateEvents = this.delegate(headerEvents);
 
-    const customAttrs = _.isFunction(headerAttrs)
-      ? headerAttrs(column, index)
-      : (headerAttrs || {});
+    const customAttrs = _.isFunction(headerAttrs) ? headerAttrs(column, index) : headerAttrs || {};
 
     const cellAttrs = {
       ...customAttrs,
       ...delegateEvents,
-      tabIndex: _.isDefined(customAttrs.tabIndex) ? customAttrs.tabIndex : 0
+      tabIndex: _.isDefined(customAttrs.tabIndex) ? customAttrs.tabIndex : 0,
     };
 
     let sortSymbol;
@@ -77,9 +75,9 @@ class HeaderCell extends eventDelegater(React.Component) {
 
     if (sort) {
       const customClick = cellAttrs.onClick;
-      cellAttrs['aria-label'] = sorting ? `${text} sort ${sortOrder}` : `${text} sortable`;
+      cellAttrs["aria-label"] = sorting ? `${text} sort ${sortOrder}` : `${text} sortable`;
       cellAttrs.onKeyUp = (e) => {
-        if (e.key === 'Enter') {
+        if (e.key === "Enter") {
           onSort(column);
           if (_.isFunction(customClick)) customClick(e);
         }
@@ -88,12 +86,10 @@ class HeaderCell extends eventDelegater(React.Component) {
         onSort(column);
         if (_.isFunction(customClick)) customClick(e);
       };
-      cellAttrs.className = cs(cellAttrs.className, 'sortable');
+      cellAttrs.className = cs(cellAttrs.className, "sortable");
 
       if (sorting) {
-        sortSymbol = sortCaretfunc ?
-          sortCaretfunc(sortOrder, column) :
-          <SortCaret order={ sortOrder } />;
+        sortSymbol = sortCaretfunc ? sortCaretfunc(sortOrder, column) : <SortCaret order={sortOrder} />;
 
         // append customized classes or style if table was sorting based on the current column.
         cellClasses = cs(
@@ -105,9 +101,9 @@ class HeaderCell extends eventDelegater(React.Component) {
 
         cellStyle = {
           ...cellStyle,
-          ..._.isFunction(headerSortingStyle)
+          ...(_.isFunction(headerSortingStyle)
             ? headerSortingStyle(column, sortOrder, isLastSorting, index)
-            : headerSortingStyle
+            : headerSortingStyle),
         };
       } else {
         sortSymbol = sortCaretfunc ? sortCaretfunc(undefined, column) : <SortSymbol />;
@@ -124,24 +120,24 @@ class HeaderCell extends eventDelegater(React.Component) {
       } else if (filter) {
         filterElm = (
           <filter.Filter
-            { ...filter.props }
-            filterState={ currFilters[column.dataField] }
-            onFilter={ onFilter }
-            column={ column }
+            {...filter.props}
+            filterState={currFilters[column.dataField]}
+            onFilter={onFilter}
+            column={column}
           />
         );
       }
     }
 
-    const children = headerFormatter ?
-      headerFormatter(column, index, { sortElement: sortSymbol, filterElement: filterElm }) :
-      text;
+    const children = headerFormatter
+      ? headerFormatter(column, index, { sortElement: sortSymbol, filterElement: filterElm })
+      : text;
 
     if (headerFormatter) {
-      return React.createElement('th', cellAttrs, children);
+      return React.createElement("th", cellAttrs, children);
     }
 
-    return React.createElement('th', cellAttrs, children, sortSymbol, filterElm);
+    return React.createElement("th", cellAttrs, children, sortSymbol, filterElm);
   }
 }
 
@@ -149,12 +145,7 @@ HeaderCell.propTypes = {
   column: PropTypes.shape({
     dataField: PropTypes.string.isRequired,
     text: PropTypes.string.isRequired,
-    type: PropTypes.oneOf([
-      Const.TYPE_STRING,
-      Const.TYPE_NUMBER,
-      Const.TYPE_BOOLEAN,
-      Const.TYPE_DATE
-    ]),
+    type: PropTypes.oneOf([Const.TYPE_STRING, Const.TYPE_NUMBER, Const.TYPE_BOOLEAN, Const.TYPE_DATE]),
     isDummyField: PropTypes.bool,
     hidden: PropTypes.bool,
     headerFormatter: PropTypes.func,
@@ -186,7 +177,12 @@ HeaderCell.propTypes = {
     filter: PropTypes.object,
     filterRenderer: PropTypes.func,
     filterValue: PropTypes.func,
-    searchable: PropTypes.bool
+    searchable: PropTypes.bool,
+    parentHeader: PropTypes.shape({
+      text: PropTypes.string,
+      colSpan: PropTypes.number,
+      style: PropTypes.object,
+    }),
   }).isRequired,
   index: PropTypes.number.isRequired,
   onSort: PropTypes.func,
@@ -195,10 +191,13 @@ HeaderCell.propTypes = {
   sortCaret: PropTypes.func,
   isLastSorting: PropTypes.bool,
   onFilter: PropTypes.func,
-  filterPosition: PropTypes.oneOf([Const.FILTERS_POSITION_INLINE,
-    Const.FILTERS_POSITION_BOTTOM, Const.FILTERS_POSITION_TOP]),
+  filterPosition: PropTypes.oneOf([
+    Const.FILTERS_POSITION_INLINE,
+    Const.FILTERS_POSITION_BOTTOM,
+    Const.FILTERS_POSITION_TOP,
+  ]),
   currFilters: PropTypes.object,
-  onExternalFilter: PropTypes.func
+  onExternalFilter: PropTypes.func,
 };
 
 export default HeaderCell;
